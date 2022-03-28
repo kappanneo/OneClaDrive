@@ -39,6 +39,7 @@ $(APIDIR)/libAPI.a: $(APIDIR)/api.o
 	ar -rc $@ $<
 
 BIN= ./BIN
+TEST= ./TEST
 
 server: $(SERVER_O) 
 	$(CC) $(CFLAGS) $(LIBS) $^ -o $@
@@ -58,10 +59,8 @@ clean:
 cleanall:	
 	rm -rf $(BIN)/READ
 	rm -rf $(BIN)/TRASH
-	
+
 test1:
 	$(BIN)/server $(TEST)/config1.txt
 	@chmod +x $(TEST)/test1.sh
 	$(TEST)/test1.sh
-
-
