@@ -7,7 +7,7 @@ FILES=$BIN/FILES
 READ=$BIN/READ
 TRASH=$BIN/TRASH
 
-F=( $(ls /home/oneclaudio/Desktop/SOL/PROGETTO/OneClaDrive/BIN/FILES) )
+F=( $(ls $FILES) )
 
 #RF="$(shuf -n10 $LIST)"	#RANDOM FILE NAME
 #RF="$FILES/$RFN"			#RANDOM FILE PATH
