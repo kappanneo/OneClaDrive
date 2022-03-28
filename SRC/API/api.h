@@ -4,9 +4,6 @@
 #define	O_CREATE 0x1
 #define O_LOCK	 0x2
 
-bool PRINT;
-
-
 
 int openFile( const char* pathname, int flags, /* */const char* trashdir);
 

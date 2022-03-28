@@ -16,6 +16,10 @@
 
 #define SOCKETPATHN "./server_sol"
 
+static int PRINT = 0;
+
+static OptQueue* optQueue;
+
 //Used for API calls inside the main command execution while loop
 //on ERROR: PRINTS API  BREAKS out of switch loop, PRINTS ERROR and SLEEPS (as much as required by -t OPTION) / on SUCCESS: SLEEPS anyway
 #define ErrAPI( call ){						\
@@ -227,34 +231,26 @@ int main (int argc, char **argv){
 		if(curr->arglist!=NULL)
 			argcpy=strdupa(curr->arglist);		//AUTOMATIC STRDUP noice
 		
-		switch(curr->cmd){
-		
-		
-		
-			case 't':{		// -t updates sleeptime timer (in milliseconds)
+		switch(curr->cmd)
+    {
+      case 't':		// -t updates sleeptime timer (in milliseconds)
 				int msec=0;
-				if( !isNumber(argcpy) )	fprintf(stderr, "Warning: argument of '-t' is NaN (milliseconds), sleep time unchanged\n");
-				else if( (msec=atoi(argcpy)) < 0) fprintf(stderr,"Warning: argument of '-t' is negative (but should represent time),\
-																  sleep time unchanged\n");
-				else{
-					sleeptime.tv_sec=  msec/1000;
+				if( !PRINT ) sleeptime.tv_sec=  msec/1000;
 					sleeptime.tv_nsec=(msec%1000)*1000000;
 					
 					if(PRINT) printf("CMD: Updated TIME DELTA: %f\n", timespectot(&sleeptime) );
-					}
-				} break;	
-			
-			
+			break;	
+		
 			case 'd':		// -d updates readdir directory path
 				readdir=strdupa(argcpy); 
 				if(PRINT) printf("CMD: Updated READ DIRECTORY: %s\n", readdir );
-				break;
+			break;
 			
 			
 			case 'D':		// -D updates trashdir directory path
 				trashdir=strdupa(argcpy);
 				if(PRINT) printf("CMD: Updated CACHE EJECTION DIRECTORY: %s\n", readdir );				
-				break;
+			break;
 			
 			
 			

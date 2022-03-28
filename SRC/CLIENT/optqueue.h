@@ -10,8 +10,6 @@ typedef struct OptQueue{			//THREAD SAFE LIST type
 										//    ^					  ^
 	} OptQueue;							//   first				last
 
-OptQueue* optQueue;
-
 int optQueueCreate();
 int optQueueDestroy();
 

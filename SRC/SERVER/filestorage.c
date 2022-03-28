@@ -7,7 +7,11 @@
 
 #include <errcheck.h>
 #include <idlist.h>
+
+#ifndef STORAGE
 #include <filestorage.h>
+#define STORAGE
+#endif
 
 	/*------------------------in-Header------------------------*/
 /*	
@@ -58,7 +62,7 @@ ErrCLEANUP
 ErrCLEAN
     }
 
-
+Storage* storage;
 
 int fileDestroy(File* victim){
 	ErrNEG1(  idListDestroy(victim->openIds)  );
@@ -68,8 +72,6 @@ int fileDestroy(File* victim){
 	SUCCESS    return 0;
 	ErrCLEANUP return -1; ErrCLEAN
 	}
-
-
 
 int storageCreate(){
     ErrNULL(  storage=calloc(1,sizeof(Storage))  );
@@ -90,7 +92,7 @@ ErrCLEANUP
 ErrCLEAN
 	}
 
-
+Storage* storage;
 
 int storageDestroy(){		//deallocates a STORAGE
 	ErrNULL(storage);		//STORAGE must have been CREATED
@@ -137,7 +139,7 @@ ErrCLEANUP
 ErrCLEAN
 	}
 
-
+Storage* storage;
 
 File* getFile( char* filename){		//getFile() LOOKS FOR a FILE and RETURNS a REFERENCE to it
 	
@@ -151,7 +153,7 @@ File* getFile( char* filename){		//getFile() LOOKS FOR a FILE and RETURNS a REFE
     return curr;					//curr==NULL 		  (if whole list traversed and the file wasnt found)
 	}
 
-
+Storage* storage;
 
 File* rmvLastFile(){				//rmvLastFile() removes the LAST file from STORAGE. The removed file is RETURNED
 										//the worker thread has the duty to destroy the file with fileDestroy()										
@@ -171,7 +173,7 @@ File* rmvLastFile(){				//rmvLastFile() removes the LAST file from STORAGE. The 
     return victim;
 	}
 
-
+Storage* storage;
 
 int rmvThisFile( File* victim){		//rmvThisFile() finds and removes a SPECIFIC FILE from STORAGE. Returns 0 if successful
 	ErrNULL(storage)					//the worker must already have a file reference (must call getFile() first)
@@ -205,9 +207,7 @@ int rmvThisFile( File* victim){		//rmvThisFile() finds and removes a SPECIFIC FI
 	ErrCLEANUP return -1; ErrCLEAN
 	}
 
-
-
-
+Storage* storage;
 
 void storagePrint(){
 	File* curr=storage->last;

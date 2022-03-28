@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "un.h": "c",
+    "limits.h": "c",
+    "socket.h": "c"
+  }
+}

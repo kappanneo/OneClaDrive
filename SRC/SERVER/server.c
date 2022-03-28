@@ -18,7 +18,11 @@
 #include <utils.h>		//READ(), WRITE(), FREAD(), FWRITE()
 #include <comm.h>
 #include <idlist.h>
+
+#ifndef FILESTORAGE
 #include <filestorage.h>
+#define FILESTORAGE
+#endif
 
 	/*------------------------Locks----------------------------*/
 
@@ -72,8 +76,11 @@ void  handleoff(int unused){
 	
 	/*-------------------Config-(default)----------------------*/
 
-#define LOGPATHN	"./serverlog.txt"
-#define SOCKETPATHN "./server_sol"
+#define TEMPFOLDER "./TEMP/"
+#define LOGFILENAME "serverlog.txt"
+#define SOCKETFILENAME "server_sol"
+#define LOGPATH TEMPFOLDER LOGFILENAME
+#define SOCKETPATH TEMPFOLDER SOCKETFILENAME
 #define MAXNUMFILES 100
 #define MAXCAPACITY 64000000  //64MB
 #define MAXWTHREADS 4
@@ -81,8 +88,8 @@ void  handleoff(int unused){
 
 #define CONFIGMAXLINE (PATH_MAX+32)
 
-char logpathn[PATH_MAX]=LOGPATHN;
-char socketpathn[PATH_MAX]=SOCKETPATHN;
+char logpathn[PATH_MAX]= LOGPATH;
+char socketpathn[PATH_MAX]= SOCKETPATH;
 int maxNumFiles=MAXNUMFILES;
 size_t maxCapacity=MAXCAPACITY;
 int maxWThreads=MAXWTHREADS;
@@ -124,10 +131,10 @@ IdList* pending;	//Thread safe FIFO QUEUE holds CIDs ready for the WORKER thread
 #define FIFOPATHN	"./done"
 int done=NOTSET;	//Named PIPE(also FIFO) holds CIDs that completed an OP but arent DISCONNECTING		M <- WT
 
-Storage* storage;	//Data Structure that holds all FILES + RWLOCK to access them
-	
 /*---------------------------------------------------WORKER----------------------------------------------------------*/	
 /*-------------------------------------------------------------------------------------------------------------------*/
+
+extern Storage* storage;
 
 // called by OPEN/WRITE/APPEND becaus they may trigger a CAP LIMIT, old file/s must be sent back to the CLIENT 
 int cacheAlg( int cid, Cmd cmd, size_t size){
@@ -487,6 +494,8 @@ ErrCLEAN
 /*-----------------------------------------------------MAIN----------------------------------------------------------*/	
 /*-------------------------------------------------------------------------------------------------------------------*/
 
+extern Storage* storage;
+
 int main(int argc, char* argv[]){
 	
 	/*------------------------Signals--------------------------*/
@@ -512,14 +521,14 @@ int main(int argc, char* argv[]){
 	/*-------------------------Log-----------------------------*/
 	
 //	FILE* Log=NULL;  moved to global
-	ErrNULL(  Log=fopen( LOGPATHN, "w")  );
+	ErrNULL(  Log=fopen( LOGPATH, "w")  );
 //  pthread_mutex_t LogMutex;
 	ErrERRNO(  pthread_mutex_init(&LogMutex, NULL)  );
 	
 	/*------------------------Config---------------------------*/
 	if(argc==1){		//CONFIG FILE NOT SPECIFIED
 		LOG("WARN: CONFIG FILE MISSING -> DEFAULT PARAMETERS LOADED\n");
-		printf("\nLOGPATHN=%s\nSOCKETPATHN=%s\nMAXNUMFILES=%d\nMAXCAPACITY=%zu\nMAXWTHREADS=%d\nBACKLOG=%d\n\n", 	\
+		printf("\nLOGPATHN=%s\nSOCKETPATH=%s\nMAXNUMFILES=%d\nMAXCAPACITY=%zu\nMAXWTHREADS=%d\nBACKLOG=%d\n\n", 	\
 						logpathn,       socketpathn,    maxNumFiles,    maxCapacity,    maxWThreads, backlog);
 		}
 	else if(argc>2){	//more than 1 ARG
@@ -539,14 +548,14 @@ int main(int argc, char* argv[]){
 			if( sscanf(line, " %s", dummy) == EOF) continue;	// blank line
 			if( sscanf(line, " %[#]", dummy) == 1) continue;	// comment
 			if( sscanf(line, " LOGPATHN = %s",        logpathn ) !=0 ) continue;
-			if( sscanf(line, " SOCKETPATHN = %s",  socketpathn ) !=0 ) continue;
+			if( sscanf(line, " SOCKETPATH = %s",  socketpathn ) !=0 ) continue;
 			if( sscanf(line, " MAXNUMFILES = %d", &maxNumFiles ) !=0 ) continue;
 			if( sscanf(line, " MAXCAPACITY = %zu",&maxCapacity ) !=0 ) continue;
 			if( sscanf(line, " MAXWTHREADS = %d", &maxWThreads ) !=0 ) continue;
 			if( sscanf(line, " BACKLOG = %d",         &backlog ) !=0 ) continue;
 			LOG("WARN: UNKNOWN CONFIG FILE PARAMETER -> IGNORED\n");
 			}
-		printf("\nLOGPATHN=%s\nSOCKETPATHN=%s\nMAXNUMFILES=%d\nMAXCAPACITY=%zu\nMAXWTHREADS=%d\nBACKLOG=%d\n\n", 	\
+		printf("\nLOGPATHN=%s\nSOCKETPATH=%s\nMAXNUMFILES=%d\nMAXCAPACITY=%zu\nMAXWTHREADS=%d\nBACKLOG=%d\n\n", 	\
 						logpathn,       socketpathn,    maxNumFiles,    maxCapacity,    maxWThreads, backlog);
 		}
 	
@@ -557,7 +566,7 @@ int main(int argc, char* argv[]){
 	struct sockaddr_un saddr;							//saddr: server address, needed for BIND
 	memset(&saddr, 0, sizeof(saddr));
 	saddr.sun_family=AF_UNIX;							//adds domain and pathname to the server address structure
-	strcpy(saddr.sun_path, SOCKETPATHN);				
+	strcpy(saddr.sun_path, SOCKETPATH);				
 	
 	ErrNEG1(  bind(sid, (struct sockaddr*) &saddr, SUN_LEN(&saddr))  );	//BIND: NAMING of the opened socket
 	
@@ -646,7 +655,7 @@ int main(int argc, char* argv[]){
 	ErrNEG1(  unlink(FIFOPATHN)      );
 	ErrNEG1(  close(done)            );
 	ErrNEG1(  idListDestroy(pending) );
-	ErrNEG1(  unlink(SOCKETPATHN)    );
+	ErrNEG1(  unlink(SOCKETPATH)    );
 	ErrNEG1(  close(sid)             );
 	LOG("MAIN: SERVER SUCCESSFULLY CLOSED\n");
 	ErrERRNO(  pthread_mutex_destroy(&LogMutex) );
@@ -658,7 +667,7 @@ ErrCLEANUP
 	unlink(FIFOPATHN);
 	if(done!=NOTSET) close(done);
 	if(pending) idListDestroy(pending);
-	unlink(SOCKETPATHN);
+	unlink(SOCKETPATH);
 	if(sid!=NOTSET) close(sid);
 	LOG("MAIN: SERVER ERROR (CLEANUP DONE)\n");
 	pthread_mutex_destroy(&LogMutex);

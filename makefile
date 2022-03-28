@@ -12,7 +12,7 @@ SHAREDDIR= ./SRC/SHARED
 SHARED_H= $(SHAREDDIR)/utils.h  $(SHAREDDIR)/errcheck.h  $(SHAREDDIR)/comm.h
 
 
-SDIR=    ./SRC/FSS
+SDIR=    ./SRC/SERVER
 SOBJDIR= $(SDIR)/OBJ
 SERVER_O= $(SOBJDIR)/server.o  $(SOBJDIR)/filestorage.o  $(SOBJDIR)/idlist.o
 SERVER_H= $(SDIR)/filestorage.h   $(SDIR)/idlist.h
@@ -25,7 +25,25 @@ CLIENT_H= $(CDIR)/optqueue.h
 
 APIDIR= ./SRC/API
 APIFLAGS= -L$(APIDIR) -lAPI
-	
+
+
+.PHONY: all clean cleanall test1
+
+all: server client
+
+clean:
+	rm -f $(SOBJDIR)/*.o  $(COBJDIR)/*.o  $(APIDIR)/*.o
+
+cleanall:	
+	rm -rf $(BIN)/READS
+	rm -rf $(BIN)/TRASH
+
+test1:
+	$(BIN)/server $(TEST)/config1.txt
+	@chmod +x $(TEST)/test1.sh
+	$(TEST)/test1.sh
+
+
 $(SOBJDIR)/%.o:  $(SDIR)/%.c     $(SHARED_H) $(SERVER_H)
 	$(CC) $(CFLAGS) $(INC_SH) $(INC_S) $< -c -o $@
 
@@ -48,19 +66,3 @@ server: $(SERVER_O)
 client: $(CLIENT_O) $(APIDIR)/libAPI.a
 	$(CC) $(CFLAGS) $(LIBS) $(APIFLAGS) $^ -o $@
 	mv $@ $(BIN)/$@
-
-
-
-.PHONY: clean cleanall test1
-
-clean:
-	rm -f $(SOBJDIR)/*.o  $(COBJDIR)/*.o
-
-cleanall:	
-	rm -rf $(BIN)/READS
-	rm -rf $(BIN)/TRASH
-
-test1:
-	$(BIN)/server $(TEST)/config1.txt
-	@chmod +x $(TEST)/test1.sh
-	$(TEST)/test1.sh

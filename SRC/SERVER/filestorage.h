@@ -1,3 +1,4 @@
+
 #include <pthread.h>
 #include <linux/limits.h>
 
@@ -16,8 +17,6 @@ File* fileCreate(char* filename);
 
 int fileDestroy(File* victim);
 
-
-
 typedef struct Storage{		//THREAD SAFE STORAGE type
     File* first;
     File* last;
@@ -27,8 +26,7 @@ typedef struct Storage{		//THREAD SAFE STORAGE type
 	size_t numfiles;
 	size_t capacity;
 	} Storage;
-	
-Storage* storage;	//GLOBAL STORAGE DECLARATION
+
 
 int storageCreate();
 

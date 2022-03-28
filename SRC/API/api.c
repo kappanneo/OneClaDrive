@@ -18,6 +18,8 @@
 #include <api.h>
 
 
+static int PRINT = 0;
+
 int sid=NOTSET;		//Server ID
 char* connsocket=NULL;
 

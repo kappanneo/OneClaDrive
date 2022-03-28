@@ -5,6 +5,8 @@
 #include <errcheck.h>
 #include <optqueue.h>
 
+static OptQueue* optQueue;
+
 /*
 typedef struct Opt{			//LIST Opt	contains:
     int cmd;						// single char represents command OPTIONS
