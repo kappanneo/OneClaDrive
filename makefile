@@ -57,7 +57,7 @@ clean:
 	rm -f $(SOBJDIR)/*.o  $(COBJDIR)/*.o
 
 cleanall:	
-	rm -rf $(BIN)/READ
+	rm -rf $(BIN)/READS
 	rm -rf $(BIN)/TRASH
 
 test1:

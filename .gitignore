@@ -1,3 +1,4 @@
 *.o
 *.a
 serverlog.txt
+/BIN/READS/*
